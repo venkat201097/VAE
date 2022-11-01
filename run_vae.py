@@ -6,7 +6,7 @@ from codebase import utils as ut
 from codebase.models.vae import VAE
 from codebase.train import train
 from pprint import pprint
-from torchvision import datasets, transforms
+from torchvision import datasets, transforms, utils
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--z',         type=int, default=10,     help="Number of latent dimensions")
@@ -47,6 +47,7 @@ else:
     if args.gen:
         images = vae.sample_x(args.n)
         grid = images.reshape(args.n,1,28,28)
+        grid = utils.make_grid(grid, nrow=20, padding=0)
         transforms.ToPILImage()(grid).save('grid.pdf')
 
     # ut.evaluate_lower_bound(vae, labeled_subset, run_iwae=True)
