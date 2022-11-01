@@ -15,7 +15,7 @@ parser.add_argument('--iter_save', type=int, default=10000, help="Save model eve
 parser.add_argument('--run',       type=int, default=0,     help="Run ID. In case you want to run replicates")
 parser.add_argument('--train',     type=int, default=1,     help="Flag for training")
 parser.add_argument('--gen',       type=int, default=1,     help="Flag for generation")
-parser.add_argument('--n',         type=int, default=10,     help="Number of generated samples")
+parser.add_argument('--n',         type=int, default=200,     help="Number of generated samples")
 args = parser.parse_args()
 layout = [
     ('model={:s}',  'vae'),
@@ -47,4 +47,6 @@ else:
     if args.gen:
         images = vae.sample_x(args.n)
         print(images.shape)
+        print(images.reshape(args.n, 28, 28).shape)
+        print(images.reshape(10,20,28,28).shape)
     # ut.evaluate_lower_bound(vae, labeled_subset, run_iwae=True)
