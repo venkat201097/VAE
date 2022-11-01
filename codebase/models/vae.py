@@ -44,14 +44,10 @@ class VAE(nn.Module):
         var_posterior_m, var_posterior_v = self.enc.encode(x)
         batch_size, x_dim = x.shape
         z = self.sample_z(batch_size) * var_posterior_v + var_posterior_m
-        assert z.shape == torch.Size(batch_size, self.z_dim)
         dec_out = self.dec.decode(z)
-        assert dec_out.shape == x.shape
 
-        kl = ut.kl_normal(var_posterior_m, var_posterior_v, self.z_prior[0], self.z_prior[1])
-        assert kl.shape == ()
+        kl = torch.mean(ut.kl_normal(var_posterior_m, var_posterior_v, self.z_prior[0], self.z_prior[1]))
         rec = -torch.mean(ut.log_bernoulli_with_logits(dec_out, x))
-        assert rec.shape == ()
         nelbo = kl + rec
         assert nelbo.shape == ()
         ################################################################################
