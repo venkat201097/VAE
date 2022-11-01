@@ -47,7 +47,7 @@ class VAE(nn.Module):
         dec_out = self.dec.decode(z)
 
         kl = torch.mean(ut.kl_normal(var_posterior_m, var_posterior_v, self.z_prior[0], self.z_prior[1]))
-        rec = -torch.mean(ut.log_bernoulli_with_logits(dec_out, x))
+        rec = torch.mean(ut.log_bernoulli_with_logits(dec_out, x))
         nelbo = kl + rec
         assert nelbo.shape == ()
         ################################################################################
