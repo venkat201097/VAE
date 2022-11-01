@@ -354,9 +354,8 @@ def get_mnist_data(device, use_test_subset=True):
         xl += [X[idx][idx_choice]]
         yl += [y[idx][idx_choice]]
     xl = torch.cat(xl).to(device)
-    yl = torch.cat(yl) #.to(device)
-    yl = yl.new(np.eye(10)[yl]).to(device)
-    # yl = yl.to(device)
+    yl = torch.cat(yl).to(device)
+    yl = yl.new(np.eye(10)[yl.cpu()])
     labeled_subset = (xl, yl)
 
     return train_loader, labeled_subset, (X_test, y_test)
