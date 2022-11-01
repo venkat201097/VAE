@@ -47,6 +47,6 @@ else:
     if args.gen:
         images = vae.sample_x(args.n)
         grid = images.reshape(args.n,1,28,28)
-        transforms.ToPILImage()(grid).save('grid.pdf')
+        transforms.ToPILImage()(grid, nrow=20, padding=0).save('grid.pdf')
 
     # ut.evaluate_lower_bound(vae, labeled_subset, run_iwae=True)
