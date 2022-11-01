@@ -46,7 +46,7 @@ else:
     ut.load_model_by_name(vae, global_step=args.iter_max)
     if args.gen:
         images = vae.sample_x(args.n)
-        print(images.shape)
-        print(images.reshape(args.n, 28, 28).shape)
-        print(images.reshape(10,20,28,28).shape)
+        grid = images.reshape(args.n,1,28,28)
+        transforms.ToPILImage()(grid).save('grid.pdf')
+
     # ut.evaluate_lower_bound(vae, labeled_subset, run_iwae=True)
