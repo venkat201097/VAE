@@ -43,7 +43,7 @@ class VAE(nn.Module):
         ################################################################################
         var_posterior_m, var_posterior_v = self.enc.encode(x)
         batch_size, x_dim = x.shape
-        z = self.sample_z(batch_size) * var_posterior_v + var_posterior_m
+        z = ut.sample_gaussian(var_posterior_m, var_posterior_v) #self.sample_z(batch_size) * var_posterior_v + var_posterior_m
         logits = self.dec.decode(z)
 
         kl = torch.mean(ut.kl_normal(var_posterior_m, var_posterior_v, self.z_prior[0], self.z_prior[1]))

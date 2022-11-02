@@ -18,6 +18,7 @@ class GMVAE(nn.Module):
         # Mixture of Gaussians prior
         self.z_pre = torch.nn.Parameter(torch.randn(1, 2 * self.k, self.z_dim)
                                         / np.sqrt(self.k * self.z_dim))
+                                
         # Uniform weighting
         self.pi = torch.nn.Parameter(torch.ones(k) / k, requires_grad=False)
 
@@ -46,7 +47,16 @@ class GMVAE(nn.Module):
         # Outputs should all be scalar
         ################################################################################
         # Compute the mixture of Gaussian prior
-        prior = ut.gaussian_parameters(self.z_pre, dim=1)
+        prior_m, prior_v = ut.gaussian_parameters(self.z_pre, dim=1)
+        var_posterior_m, var_posterior_v = self.enc.encode(x)
+        batch_size, x_dim = x.shape
+        z = ut.sample_gaussian(var_posterior_m, var_posterior_v)
+        logits = self.dec.decode(z)
+
+        kl = torch.mean(ut.log_normal(z, var_posterior_m, var_posterior_v) - ut.log_normal_mixture(z, ut.duplicate(prior_m, batch_size), ut.duplicate(prior_v, batch_size)))
+        rec = -torch.mean(ut.log_bernoulli_with_logits(x, logits))
+        nelbo = kl + rec
+        assert nelbo.shape == ()
         ################################################################################
         # End of code modification
         ################################################################################
