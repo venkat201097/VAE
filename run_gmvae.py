@@ -6,7 +6,7 @@ from codebase import utils as ut
 from codebase.models.gmvae import GMVAE
 from codebase.train import train
 from pprint import pprint
-from torchvision import datasets, transforms
+from torchvision import datasets, transforms, utils
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--z',         type=int, default=10,    help="Number of latent dimensions")
@@ -47,8 +47,8 @@ if args.train:
 else:
     ut.load_model_by_name(gmvae, global_step=args.iter_max)
     if args.gen:
-        images = vae.sample_x(args.n)
+        images = gmvae.sample_x(args.n)
         grid = images.reshape(args.n,1,28,28)
         grid = utils.make_grid(grid, nrow=20, padding=0)
-        transforms.ToPILImage()(grid).save('grid_run-{}.pdf'.format(args.run))
+        transforms.ToPILImage()(grid).save('gmvae_grid_run-{}.pdf'.format(args.run))
     # ut.evaluate_lower_bound(gmvae, labeled_subset, run_iwae=True)

@@ -97,7 +97,7 @@ def log_normal_mixture(z, m, v):
     ################################################################################
 
     z_ = z.unsqueeze(1) # To compute log_normal for each of the k densities
-    log_prob = -torch.log(self.k) + log_sum_exp(log_normal(z_, m, v), dim=1)
+    log_prob = log_mean_exp(log_normal(z_, m, v), dim=1)
 
     ################################################################################
     # End of code modification
