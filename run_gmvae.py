@@ -15,6 +15,8 @@ parser.add_argument('--iter_max',  type=int, default=20000, help="Number of trai
 parser.add_argument('--iter_save', type=int, default=10000, help="Save model every n iterations")
 parser.add_argument('--run',       type=int, default=0,     help="Run ID. In case you want to run replicates")
 parser.add_argument('--train',     type=int, default=1,     help="Flag for training")
+parser.add_argument('--gen',       type=int, default=1,     help="Flag for generation")
+parser.add_argument('--n',         type=int, default=200,     help="Number of generated samples")
 args = parser.parse_args()
 layout = [
     ('model={:s}',  'gmvae'),
@@ -44,4 +46,9 @@ if args.train:
 
 else:
     ut.load_model_by_name(gmvae, global_step=args.iter_max)
-    ut.evaluate_lower_bound(gmvae, labeled_subset, run_iwae=True)
+    if args.gen:
+        images = vae.sample_x(args.n)
+        grid = images.reshape(args.n,1,28,28)
+        grid = utils.make_grid(grid, nrow=20, padding=0)
+        transforms.ToPILImage()(grid).save('grid_run-{}.pdf'.format(args.run))
+    # ut.evaluate_lower_bound(gmvae, labeled_subset, run_iwae=True)
