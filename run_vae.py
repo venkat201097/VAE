@@ -42,12 +42,12 @@ if args.train:
           iter_save=args.iter_save)
     ut.evaluate_lower_bound(vae, labeled_subset, run_iwae=args.train == 2)
 
-else:
+if args.gen:
     ut.load_model_by_name(vae, global_step=args.iter_max)
     if args.gen:
         images = vae.sample_x(args.n)
         grid = images.reshape(args.n,1,28,28)
         grid = utils.make_grid(grid, nrow=20, padding=0)
-        transforms.ToPILImage()(grid).save('grid_run-{}.pdf'.format(args.run))
+        transforms.ToPILImage()(grid).save('Images/vae_grid_run-{}.pdf'.format(args.run))
 
     # ut.evaluate_lower_bound(vae, labeled_subset, run_iwae=True)
