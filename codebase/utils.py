@@ -38,7 +38,7 @@ def sample_gaussian(m, v):
     ################################################################################
     eps_m = torch.zeros_like(m)
     eps_v = torch.ones_like(v)
-    eps = torch.normal(m, v)
+    eps = torch.normal(eps_m, eps_v)
     # z = torch.normal(m, v)
     z = eps * v + m
     
