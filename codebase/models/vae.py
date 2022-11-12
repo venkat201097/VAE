@@ -54,6 +54,11 @@ class VAE(nn.Module):
         # End of code modification
         ################################################################################
         return nelbo, kl, rec
+    
+    def compute_q_z(self, x):
+        var_posterior_m, var_posterior_v = self.enc.encode(x)
+        self.q_z = (torch.sum(var_posterior_m, dim=1), torch.sqrt(torch.sum(var_posterior_v, dim=1)))
+        
 
     def negative_iwae_bound(self, x, iw):
         """
@@ -105,8 +110,8 @@ class VAE(nn.Module):
 
     def sample_z(self, batch):
         return ut.sample_gaussian(
-            self.z_prior[0].expand(batch, self.z_dim),
-            self.z_prior[1].expand(batch, self.z_dim))
+            self.q_z[0].expand(batch, self.z_dim),
+            self.q_z[1].expand(batch, self.z_dim))
 
     def sample_x(self, batch):
         z = self.sample_z(batch)

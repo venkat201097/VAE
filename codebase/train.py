@@ -8,6 +8,11 @@ from torch import nn, optim
 from torch.nn import functional as F
 from torchvision.utils import save_image
 
+def get_q_z(model, train_loader, device):
+    xs = []
+    for batch_idx, (xu, yu) in enumerate(train_loader):
+        xs.append(xu.to(device).reshape(xu.size(0), -1))
+    xss = torch.cat(
 def train(model, train_loader, labeled_subset, device, tqdm, writer,
           iter_max=np.inf, iter_save=np.inf,
           model_name='model', y_status='none', reinitialize=False):

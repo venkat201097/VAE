@@ -4,7 +4,7 @@ from codebase.models import nns
 from torch import nn
 from torch.nn import functional as F
 
-class VAE(nn.Module):
+class VAEDEC(nn.Module):
     def __init__(self, nn='v1', name='vae', z_dim=2):
         super().__init__()
         self.name = name
@@ -20,6 +20,7 @@ class VAE(nn.Module):
         self.z_prior_m = torch.nn.Parameter(torch.zeros(1), requires_grad=False)
         self.z_prior_v = torch.nn.Parameter(torch.ones(1), requires_grad=False)
         self.z_prior = (self.z_prior_m, self.z_prior_v)
+        self.bce = torch.nn.BCEWithLogitsLoss(reduction='none')
 
     def negative_elbo_bound(self, x):
         """
@@ -43,17 +44,18 @@ class VAE(nn.Module):
         ################################################################################
         # var_posterior_m, var_posterior_v = self.enc.encode(x)
         batch_size, x_dim = x.shape
-        z = ut.sample_gaussian(self.z_prior[0], self.z_prior[1]) # var_posterior_m, var_posterior_v) #self.sample_z(batch_size) * var_posterior_v + var_posterior_m
-        logits = self.dec.decode(z)
+        z = ut.sample_gaussian(torch.zeros(batch_size * 1000, self.z_dim, device="cuda"), torch.ones(batch_size * 1000, self.z_dim, device="cuda")) #self.z_prior[0], self.z_prior[1]) # var_posterior_m, var_posterior_v) #self.sample_z(batch_size) * var_posterior_v + var_posterior_m
+        logits = self.dec.decode(z).reshape(batch_size, 1000, x_dim)
 
         # kl = torch.mean(ut.kl_normal(var_posterior_m, var_posterior_v, self.z_prior[0], self.z_prior[1]))
-        rec = -torch.mean(ut.log_bernoulli_with_logits(x, logits))
+        rec = torch.mean(self.bce(logits, x.unsqueeze(1).expand(batch_size,1000,x_dim)).sum(1).sum(-1))
+        #rec = -torch.mean(ut.log_bernoulli_with_logits(x, logits))
         loss = rec
-        assert nelbo.shape == ()
+        assert loss.shape == ()
         ################################################################################
         # End of code modification
         ################################################################################
-        return nelbo, 0, rec
+        return 0, 0, rec
 
     def negative_iwae_bound(self, x, iw):
         """

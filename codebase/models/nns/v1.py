@@ -34,6 +34,8 @@ class Decoder(nn.Module):
             nn.ELU(),
             nn.Linear(300, 300),
             nn.ELU(),
+            nn.Linear(300, 300),
+            nn.ELU(),
             nn.Linear(300, 784)
         )
 
