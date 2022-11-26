@@ -1,6 +1,6 @@
 <h1> Variational Auto-Encoders </h1>
 
-This is my implementation of Variational Auto-Encoders for [CSE-291B - Deep Generative Models](https://sites.google.com/view/cse291). My implementation builds on top of a starter code, and includes the following - 
+This is my implementation of Variational Auto-Encoders  on the MNIST dataset for [CSE-291B - Deep Generative Models](https://sites.google.com/view/cse291). My implementation builds on top of a starter code, and includes the following - 
 1. Reparameterization trick for computing gradients.
 1. Negative ELBO bound for computing the training loss.
 1. Vanilla VAE - using a unit-mean isotropic gaussian prior. The variational posterior is a gaussian.
@@ -15,6 +15,19 @@ The models can take a while to run on CPU, so please prepare accordingly. On a
 1. `log_normal` in `utils.py`
 1. `log_normal_mixture` in `utils.py`
 1. `negative_elbo_bound` in `gmvae.py`
+
+### Sample Images
+#### Vanilla VAE
+
+<p align="center">
+    <img src="Images/vae_grid_run-2-1.png" width="80%">
+</p>
+
+#### Gaussian Mixture VAE
+
+<p align="center">
+    <img src="Images/gmvae_grid_run-2-1.png" width="80%">
+</p>
 
 ### Dependencies
 
