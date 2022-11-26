@@ -5,10 +5,11 @@ from torch import nn
 from torch.nn import functional as F
 
 class VAE(nn.Module):
-    def __init__(self, nn='v1', name='vae', z_dim=2):
+    def __init__(self, nn='v1', name='vae', z_dim=2, n_mc_samples=1):
         super().__init__()
         self.name = name
         self.z_dim = z_dim
+        self.n_mc_samples = n_mc_samples
         # Small note: unfortunate name clash with torch.nn
         # nn here refers to the specific architecture file found in
         # codebase/models/nns/*.py
@@ -43,11 +44,12 @@ class VAE(nn.Module):
         ################################################################################
         var_posterior_m, var_posterior_v = self.enc.encode(x)
         batch_size, x_dim = x.shape
-        z = ut.sample_gaussian(var_posterior_m, var_posterior_v) #self.sample_z(batch_size) * var_posterior_v + var_posterior_m
+        z = ut.sample_gaussian(ut.duplicate(var_posterior_m, self.n_mc_samples), ut.duplicate(var_posterior_v, self.n_mc_samples)) #self.sample_z(batch_size) * var_posterior_v + var_posterior_m
         logits = self.dec.decode(z)
 
         kl = torch.mean(ut.kl_normal(var_posterior_m, var_posterior_v, self.z_prior[0], self.z_prior[1]))
-        rec = -torch.mean(ut.log_bernoulli_with_logits(x, logits))
+        assert ut.log_bernoulli_with_logits(x.expand(self.n_mc_samples, -1, -1), logits.reshape(self.n_mc_samples, batch_size, x_dim)).shape == (self.n_mc_samples, batch_size)
+        rec = -torch.mean(ut.log_bernoulli_with_logits(x.expand(self.n_mc_samples, -1, -1), logits.reshape(self.n_mc_samples, batch_size, x_dim)))
         nelbo = kl + rec
         assert nelbo.shape == ()
         ################################################################################
