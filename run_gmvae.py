@@ -30,7 +30,7 @@ print('Model name:', model_name)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 train_loader, labeled_subset, _ = ut.get_mnist_data(device, use_test_subset=True)
-gmvae = GMVAE(z_dim=args.z, k=args.k, name=model_name).to(device)
+gmvae = GMVAE(z_dim=args.z, k=args.k, name=model_name, n_mc_samples=64).to(device)
 
 if args.train:
     writer = ut.prepare_writer(model_name, overwrite_existing=True)
@@ -50,5 +50,5 @@ if args.gen:
         images = gmvae.sample_x(args.n)
         grid = images.reshape(args.n,1,28,28)
         grid = utils.make_grid(grid, nrow=20, padding=0)
-        transforms.ToPILImage()(grid).save('Images/gmvae_grid_run-{}.pdf'.format(args.run))
+        transforms.ToPILImage()(grid).save('Images/gmvae_grid_run-{}.png'.format(args.run))
     # ut.evaluate_lower_bound(gmvae, labeled_subset, run_iwae=True)

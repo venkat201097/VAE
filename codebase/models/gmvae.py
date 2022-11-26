@@ -6,11 +6,12 @@ from torch import nn
 from torch.nn import functional as F
 
 class GMVAE(nn.Module):
-    def __init__(self, nn='v1', z_dim=2, k=500, name='gmvae'):
+    def __init__(self, nn='v1', z_dim=2, k=500, name='gmvae', n_mc_samples=1):
         super().__init__()
         self.name = name
         self.k = k
         self.z_dim = z_dim
+        self.n_mc_samples = n_mc_samples
         nn = getattr(nns, nn)
         self.enc = nn.Encoder(self.z_dim)
         self.dec = nn.Decoder(self.z_dim)
@@ -50,11 +51,11 @@ class GMVAE(nn.Module):
         prior_m, prior_v = ut.gaussian_parameters(self.z_pre, dim=1)
         var_posterior_m, var_posterior_v = self.enc.encode(x)
         batch_size, x_dim = x.shape
-        z = ut.sample_gaussian(var_posterior_m, var_posterior_v)
+        z = ut.sample_gaussian(ut.duplicate(var_posterior_m, self.n_mc_samples), ut.duplicate(var_posterior_v, self.n_mc_samples)) #ut.sample_gaussian(var_posterior_m, var_posterior_v)
         logits = self.dec.decode(z)
 
         kl = torch.mean(ut.log_normal(z, var_posterior_m, var_posterior_v) - ut.log_normal_mixture(z, ut.duplicate(prior_m, batch_size), ut.duplicate(prior_v, batch_size)))
-        rec = -torch.mean(ut.log_bernoulli_with_logits(x, logits))
+        rec = -torch.mean(ut.log_bernoulli_with_logits(x.expand(self.n_mc_samples, -1, -1), logits.reshape(self.n_mc_samples, batch_size, x_dim)))
         nelbo = kl + rec
         assert nelbo.shape == ()
         ################################################################################

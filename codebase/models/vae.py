@@ -48,7 +48,6 @@ class VAE(nn.Module):
         logits = self.dec.decode(z)
 
         kl = torch.mean(ut.kl_normal(var_posterior_m, var_posterior_v, self.z_prior[0], self.z_prior[1]))
-        assert ut.log_bernoulli_with_logits(x.expand(self.n_mc_samples, -1, -1), logits.reshape(self.n_mc_samples, batch_size, x_dim)).shape == (self.n_mc_samples, batch_size)
         rec = -torch.mean(ut.log_bernoulli_with_logits(x.expand(self.n_mc_samples, -1, -1), logits.reshape(self.n_mc_samples, batch_size, x_dim)))
         nelbo = kl + rec
         assert nelbo.shape == ()
